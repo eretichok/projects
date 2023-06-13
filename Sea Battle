@@ -1,0 +1,383 @@
+from random import randint
+import sys
+
+
+class Dot:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+    def __str__(self):
+        return f'{self.x+1} {self.y+1}'
+
+
+class Board:
+    def __init__(self, board_size, ship_list, hide=False):
+        self.board_size = board_size
+        self.board = [['∙'] * board_size for _ in range(board_size)]
+        self.ship_list = ship_list
+        self.all_ship_count = 0
+        self.hide = hide
+        self.auto_add_ships()
+
+    def auto_add_ships(self):
+        # Метод автоматической расстановки кораблей
+        attempt_counter = 0
+        default_ship_list = self.ship_list.copy()
+        while self.all_ship_count != len(self.ship_list) and attempt_counter < 100:
+            for ship in self.ship_list:
+                if not isinstance(ship, Ship):
+                    x, y = randint(0, self.board_size-1), randint(0, self.board_size-1)
+                    _dir = ('gor', 'ver')[randint(0, 1)]
+                    if self.board[x][y] == '∙':
+                        if x + ship - 1 <= self.board_size-1 and _dir == 'gor':
+                            s = Ship(ship, Dot(x, y), _dir, ship, self.board_size)
+                            if s.check_near_cell(self.board):
+                                self.all_ship_count += 1
+                                for i in range(s.lenght):
+                                    self.board[x+i][y] = s
+                                self.ship_list.remove(ship)
+                                self.ship_list.append(s)
+                            else:
+                                attempt_counter += 1
+                                continue
+                        elif y + ship - 1 <= self.board_size-1 and _dir == 'ver':
+                            s = Ship(ship, Dot(x, y), _dir, ship, self.board_size)
+                            if s.check_near_cell(self.board):
+                                self.all_ship_count += 1
+                                for i in range(s.lenght):
+                                    self.board[x][y+i] = s
+                                self.ship_list.remove(ship)
+                                self.ship_list.append(s)
+                            else:
+                                attempt_counter += 1
+                                continue
+                        else:
+                            attempt_counter += 1
+                            continue
+                    else:
+                        attempt_counter += 1
+                        continue
+                else:
+                    attempt_counter += 1
+                    continue
+        if attempt_counter >= 100:
+            self.all_ship_count = 0
+            self.board = [['∙'] * self.board_size for _ in range(self.board_size)]
+            self.ship_list = default_ship_list
+            self.auto_add_ships()
+
+    def contour(self, ship):
+        # Обводит корабль по контуру. Помечает соседние точки, где корабля по правилам быть не может.
+        for cell in ship.near_ship_cells():
+            self.board[cell.x][cell.y] = '0'
+
+    def show_board(self):
+        # Показывает доску.
+        print('  ', *[f'{str(i).ljust(2)}' for i in range(1, self.board_size+1)])
+        if self.hide:
+            for i, line in enumerate(self.board):
+                res = f"{str(i+1).ljust(2)}"
+                for elem in line:
+                    if isinstance(elem, Ship):
+                        res += ' ∙ '
+                    else:
+                        res += f' {elem.ljust(2)}'
+                print(res)
+        else:
+            for i, line in enumerate(self.board):
+                print(str(i+1).ljust(2), *[str(i).ljust(2) for i in line])
+
+    # @staticmethod
+    def show_two_boards(self):
+        print('-'*(self.board_size*3+2))
+        print('Доска игрока:')
+        g.user.board.show_board()
+        print('\nДоска противника:')
+        g.ai.board.show_board()
+        print('-'*(self.board_size*3+2))
+
+    def out(self, dot):
+        # Возвращает True, если точка вне доски.
+        return not 0 <= dot.x < self.board_size or not 0 <= dot.y < self.board_size
+
+    def ai_shot(self, dot):
+        # Выстрел ИИ
+        cell = self.board[dot.x][dot.y]
+        if cell != '0' and cell != 'Х':
+            if cell == '∙':
+                self.board[dot.x][dot.y] = '0'
+                print(f'ИИ сделал выстрел по координатам {dot} и промахнулся')
+                return False
+            elif isinstance(cell, Ship):
+                if cell.lenght == 1 or cell.life - 1 == 0:
+                    self.contour(cell)
+                    cell.life = 0
+                    self.all_ship_count -= 1
+                    self.ship_list.remove(cell)
+                    self.board[dot.x][dot.y] = 'Х'
+                    print(f'ИИ уничтожил ваш корабль, выстрелив по координатам {dot}!')
+                    return True
+                else:
+                    cell.life -= 1
+                    self.board[dot.x][dot.y] = 'Х'
+                    print(f'ИИ ранил ваш корабль, выстрелив по координатам {dot}!')
+                    # self.ai_shot(Dot(dot.x))   # дописать условие, что бы ИИ стрелял рядом после ранения
+                    return True
+        else:
+            return True
+
+    def shot(self, dot):
+        # Выстрел игрока
+        if not self.out(dot):
+            cell = self.board[dot.x][dot.y]
+            if cell == '∙':
+                self.board[dot.x][dot.y] = '0'
+                print('Вы промахнулись')
+                return False
+            elif cell == '0' or cell == 'Х':
+                print('Вы уже сюда стреляли. Повторите ввод координат.')
+                return True
+            elif isinstance(cell, Ship):
+                if cell.lenght == 1 or cell.life - 1 == 0:
+                    cell.life = 0
+                    self.all_ship_count -= 1
+                    self.ship_list.remove(cell)
+                    self.contour(cell)
+                    self.board[dot.x][dot.y] = 'Х'
+                    print('Вы уничтожили вражеский корабль!')
+                    if not g.check_winner:
+                        print('Снова ходит Игрок')
+                    return True
+                else:
+                    cell.life -= 1
+                    self.board[dot.x][dot.y] = 'Х'
+                    print('Вы ранили вражеский корабль!')
+                    print('Снова ходит Игрок')
+                    return True
+        else:
+            print('Координаты выстрела не корректны. Повторите ввод координат.')
+            return True
+
+
+class Ship:
+    def __init__(self, lenght, start_dot, direction, life, board_size):
+        self.lenght = lenght
+        self.start_dot = start_dot
+        self.direction = direction
+        self.life = life
+        self.max_b_index = board_size - 1
+
+    def __str__(self):
+        return '▇▇'
+
+    @property
+    def ship_dots(self):
+        # Возвращает список всех точек корабля
+        dot_list = []
+
+        for i in range(self.lenght):
+            if self.direction == "gor":
+                dot_list.append(Dot(self.start_dot.x + i, self.start_dot.y))
+            elif self.direction == "ver":
+                dot_list.append(Dot(self.start_dot.x, self.start_dot.y + i))
+        return dot_list
+
+    def near_ship_cells(self):
+        # Возвращает список всех точек вокруг корабля
+        result_list = []
+        near_dot = [[-1,-1], [-1,0], [-1,+1], [0,+1], [+1,+1], [+1,0], [+1,-1], [0,-1]]
+        for i in range(self.lenght):
+            for elem in near_dot:
+                if self.direction == 'gor':
+                    if Dot(self.start_dot.x + i + elem[0], self.start_dot.y + elem[1]) not in result_list:
+                        if 0 <= self.start_dot.x + i + elem[0] <= self.max_b_index \
+                                and 0 <= self.start_dot.y + elem[1] <= self.max_b_index:
+                            result_list.append(Dot(self.start_dot.x + i + elem[0], self.start_dot.y + elem[1]))
+                        else:
+                            continue
+                else:
+                    if Dot(self.start_dot.x + elem[0], self.start_dot.y + i + elem[1]) not in result_list:
+                        if 0 <= self.start_dot.x + elem[0] <= self.max_b_index and \
+                                0 <= self.start_dot.y + i + elem[1] <= self.max_b_index:
+                            result_list.append(Dot(self.start_dot.x + elem[0], self.start_dot.y + i + elem[1]))
+                        else:
+                            continue
+        for dot in result_list:
+            if dot in self.ship_dots:
+                result_list.remove(dot)
+        return result_list
+
+    def check_near_cell(self, board):
+        # Метод для расстановки кораблей:
+        # возвращает True если рядом с предполагаемым местом установки корабля нет других кораблей
+        for cell in self.near_ship_cells():
+            if isinstance(board[cell.x][cell.y], Ship):
+                return False
+            else:
+                continue
+        for cell in self.ship_dots:
+            if isinstance(board[cell.x][cell.y], Ship):
+                return False
+            else:
+                continue
+        return True
+
+
+class Player:
+    def __init__(self, board, enemy):
+        self.board = board
+        self.enemy = enemy
+
+    def ask(self):
+        pass
+
+    def move(self):
+        pass
+
+
+class Ai(Player):
+    def ask(self):
+        # Генератор координат для выстрела ИИ
+        x, y = randint(0, self.board.board_size-1), randint(0, self.board.board_size-1)
+        return Dot(x, y)
+
+    def move(self):
+        # Ход ИИ
+        dot = self.ask()
+        return self.enemy.ai_shot(dot)
+
+
+class User(Player):
+    @staticmethod
+    def check_coord(x_y):
+        # Проверка введенных пользователем координат
+        if len(x_y.split()) == 2:
+            x, y = x_y.split()
+            if x.isdigit() and y.isdigit():
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def ask(self):
+        # Запрос на координаты выстрела
+        x_y = input('Введите координаты x и y через пробел:\n')
+        if User.check_coord(x_y):
+            x, y = map(int, x_y.split())
+            return Dot(x - 1, y - 1)
+        else:
+            print('Формат ввода не корректен. Повторите.')
+            g.loop()
+
+    def move(self):
+        # Ход игрока
+        dot = self.ask()
+        return self.enemy.shot(dot)
+
+
+class Game:
+    def __init__(self):
+        self.turn_counter = 1
+        self.ai_flag = True
+
+    def great(self):
+        # Начало игры
+        print(' '*8, '*' * 19)
+        print(' '*7, '*'*4, 'МОРСКОЙ БОЙ', '*'*4)
+        print(' '*8, '*' * 19)
+        print('Добро пожаловать в игру "Морской бой"!!!')
+        board_size, ship_list, text = self.ask_game_difficult()
+        temp = ship_list.copy()
+        print(f'Ваши настройки игры:\n'
+              f'Поле {board_size}х{board_size}.\n'
+              f'Корабли: {text}\n')
+        user_board = Board(board_size, temp)
+        ai_board = Board(board_size, ship_list, hide=False)
+        self.user = User(user_board, ai_board)
+        self.ai = Ai(ai_board, user_board)
+        print('Что бы выстрелить, Вам нужно ввести координаты клетки "x y" (через пробел)')
+
+    def get_answer(self, start, stop):
+        # Метод проверки правильности ответа в зависимости от разрешенного диапазона ответов (от start до stop)
+        answer = input()
+        if len(answer) != 1 or not answer.isdigit() or int(answer) not in range(start, stop + 1):
+            print('Формат ввода не корректен. Повторите.')
+            self.get_answer(start, stop)
+        else:
+            return int(answer)
+
+    def ask_game_difficult(self):
+        # Метод выбора уровня сложности
+        print('Выберите уровень сложности (1-3)')
+        print('1: Размер доски -  6х6.  Корабли - 6шт.')
+        print('2: Размер доски -  8х8.  Корабли - 8шт.')
+        print('3: Размер доски - 10х10. Корабли - 10шт.')
+        difficult = self.get_answer(1, 4)
+        board_size = (6, 8, 10)[difficult-1]
+        ship_list = ([3, 2, 2, 1, 1, 1], [3, 3, 2, 2, 1, 1, 1, 1],
+                     [4, 3, 3, 2, 2, 2, 1, 1, 1, 1])[difficult-1]
+        text = ('3х - 1шт., 2х - 2шт., 1х - 3шт.', '3х - 2шт., 2х - 2шт., 1х - 4шт.',
+                '4х - 1шт., 3х - 2шт., 2х - 3шт., 1х - 4шт.')[difficult-1]
+        return board_size, ship_list, text
+
+    def loop(self):
+        # Основной цикл игры
+        while True:
+            if self.turn_counter % 2 == 1:
+                self.user.board.show_two_boards()
+                print('\nХодит Игрок')
+                if self.user.move():
+                    if self.check_winner():
+                        self.finish()
+                    self.loop()
+            else:
+                if self.ai_flag:
+                    print('\nХодит ИИ')
+                if self.ai.move():
+                    if self.check_winner():
+                        self.finish()
+                    self.ai_flag = False
+                    self.loop()
+            self.turn_counter += 1
+            self.ai_flag = True
+
+    def check_winner(self):
+        # Проверка на победу
+        if self.ai.board.all_ship_count == 0 or self.user.board.all_ship_count == 0:
+            return True
+
+    def finish(self):
+        # Запрос на повтор игры (True - завершить игру)
+        self.ai.board.hide = False
+        self.user.board.show_two_boards()
+        if self.ai.board.all_ship_count == 0:
+            print(f'Вы уничтожили все корабли противника за {self.turn_counter} ходов.\n'
+                  f'У вас осталось {self.user.board.all_ship_count} кораблей.\n'
+                  f'Вы победили! Поздравляю!')
+        elif self.user.board.all_ship_count == 0:
+            print(f'Противник уничтожил все ваши корабли за {self.turn_counter} ходов.\n'
+                  f'У него осталось {self.ai.board.all_ship_count} кораблей.\n'
+                  f'Вы проиграли! Повезет в следующий раз!\n')
+        print('Хотите сыграть еще раз? (1 - нет, 2 - да)')
+        answer = self.get_answer(1, 3)
+        if answer == 2:
+            g.turn_counter = 1
+            self.start()
+        else:
+            sys.exit()
+
+    @staticmethod
+    def start():
+        # Игра
+        g.great()
+        g.loop()
+        g.finish()
+
+
+g = Game()
+g.start()
