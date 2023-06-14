@@ -76,7 +76,7 @@ class Board:
             self.board[cell.x][cell.y] = '0'
 
     def show_board(self):
-        # Показывает доску.
+        # Печать доски.
         print('  ', *[f'{str(i).ljust(2)}' for i in range(1, self.board_size+1)])
         if self.hide:
             for i, line in enumerate(self.board):
@@ -93,6 +93,7 @@ class Board:
 
     # @staticmethod
     def show_two_boards(self):
+        # Печать двух досок (своя/противник)
         print('-'*(self.board_size*3+2))
         print('Доска игрока:')
         g.user.board.show_board()
@@ -105,7 +106,7 @@ class Board:
         return not 0 <= dot.x < self.board_size or not 0 <= dot.y < self.board_size
 
     def ai_shot(self, dot):
-        # Выстрел ИИ
+        # Выстрел ИИ. Возвращает True, если нужен повторный ход.
         cell = self.board[dot.x][dot.y]
         if cell != '0' and cell != 'Х':
             if cell == '∙':
@@ -131,7 +132,7 @@ class Board:
             return True
 
     def shot(self, dot):
-        # Выстрел игрока
+        # Выстрел игрока. Возвращает True, если нужен повторный ход.
         if not self.out(dot):
             cell = self.board[dot.x][dot.y]
             if cell == '∙':
@@ -297,7 +298,7 @@ class Game:
               f'Поле {board_size}х{board_size}.\n'
               f'Корабли: {text}\n')
         user_board = Board(board_size, temp)
-        ai_board = Board(board_size, ship_list, hide=False)
+        ai_board = Board(board_size, ship_list, hide=True)
         self.user = User(user_board, ai_board)
         self.ai = Ai(ai_board, user_board)
         print('Что бы выстрелить, Вам нужно ввести координаты клетки "x y" (через пробел)')
@@ -326,7 +327,7 @@ class Game:
         return board_size, ship_list, text
 
     def loop(self):
-        # Основной цикл игры
+        # Основной цикл игры (self.ai_flag - заглушка для того что бы не дублировалась надпись "Ходит ИИ")
         while True:
             if self.turn_counter % 2 == 1:
                 self.user.board.show_two_boards()
@@ -347,12 +348,12 @@ class Game:
             self.ai_flag = True
 
     def check_winner(self):
-        # Проверка на победу
+        # Проверка на победу: возвращает True, если кто-то выиграл
         if self.ai.board.all_ship_count == 0 or self.user.board.all_ship_count == 0:
             return True
 
     def finish(self):
-        # Запрос на повтор игры (True - завершить игру)
+        # Финальные "титры" + запрос на повтор игры.
         self.ai.board.hide = False
         self.user.board.show_two_boards()
         if self.ai.board.all_ship_count == 0:
