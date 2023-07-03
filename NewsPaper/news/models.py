@@ -62,6 +62,9 @@ class Post(models.Model):
     def preview(self):
         return f'{self.text[:124]}...'
 
+    def __str__(self):
+        return f'{self.headline}: {self.text[:20]}'
+
 
 # Модель связки публикация с категориями (many_to_many)
 class PostCategory(models.Model):
@@ -86,3 +89,5 @@ class Comment(models.Model):
     def dislike(self):
         self.rating -= 1
         self.save()
+
+

@@ -18,6 +18,7 @@ c4 = Category.objects.create(category_name='Наука')
 p1 = Post.objects.create(author=auth1, post_category='Статья', headline='Cтатья 1', text='Текст статьи 1')
 p2 = Post.objects.create(author=auth2, post_category='Статья', headline='Cтатья 2', text='Текст статьи 2')
 p3 = Post.objects.create(author=auth1, post_category='Новость', headline='Новость 1', text='Текст новости 1')
+p4 = Post.objects.create(author=auth2, post_category='Новость', headline='Новость 2', text='Текст новости 2 с нецензурной лексикой: f*ck.')
 
 # Присвоить им категории (как минимум в одной статье/новости должно быть не меньше 2 категорий).
 PostCategory.objects.create(post=p1, category=c2)
