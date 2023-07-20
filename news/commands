@@ -1,0 +1,29 @@
+pip install django
+pip install django_filter
+
+Вирт.окружение:
+python -m venv venv
+
+Создать проект:
+django-admin startproject news
+
+Создать приложение в проекте:
+python manage.py startapp main
+
+Создать суперпользователя для доступа к админке:
+python manage.py createsuperuser
+
+Запуск приложения:
+cd news
+venv/scripts/activate
+cd news
+python manage.py runserver
+
+Миграции:
+python manage.py makemigrations
+python manage.py migrate
+
+
+Ссылки:
+http://localhost:8000/
+http://localhost:8000/admin/
