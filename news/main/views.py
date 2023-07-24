@@ -1,8 +1,10 @@
-from .models import Post, Author
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from .models import Post
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .filters import PostFilter
 from .forms import PostForm
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
 # Представление списка публикаций
@@ -30,7 +32,7 @@ class Search(ListView):
     paginate_by = 5
     success_url = reverse_lazy('posts_list')
 
-    # накладываем фильтр данные запрашиваемые из базы
+    # накладываем фильтр на данные запрашиваемые из базы
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['filterset'] = self.filterset
@@ -44,7 +46,8 @@ class Search(ListView):
 
 
 # Представление для создания новости
-class NewsCreate(CreateView):
+class NewsCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    permission_required = ('main.add_post', )
     form_class = PostForm
     model = Post
     template_name = 'news_create.html'
@@ -56,8 +59,10 @@ class NewsCreate(CreateView):
         # post.author = self.request.author
         return super().form_valid(form)
 
+
 # Представление для создания статьи
-class ArticleCreate(CreateView):
+class ArticleCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    permission_required = ('main.add_post', )
     form_class = PostForm
     model = Post
     template_name = 'article_create.html'
@@ -71,14 +76,16 @@ class ArticleCreate(CreateView):
 
 
 # Представление для изменения поста
-class PostsEdit(UpdateView):
+class PostsEdit(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    permission_required = ('main.change_post', )
     form_class = PostForm
     model = Post
     template_name = 'posts_edit.html'
 
 
 # Представление для удаления поста.
-class PostsDelete(DeleteView):
+class PostsDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    permission_required = ('main.delete_post', )
     model = Post
     template_name = 'posts_delete.html'
     success_url = reverse_lazy('posts')

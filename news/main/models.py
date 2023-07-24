@@ -45,15 +45,16 @@ class Category(models.Model):
     def __str__(self):
         return self.category_name
 
+ARTICLE = 'AR'
+NEWS = 'NW'
+POST_CATEGORY_CHOICES = [
+    (ARTICLE, 'Статья'),
+    (NEWS, 'Новость'),
+]
 
 # Модель публикаций
 class Post(models.Model):
-    ARTICLE = 'AR'
-    NEWS = 'NW'
-    POST_CATEGORY_CHOICES = [
-        (ARTICLE, 'Статья'),
-        (NEWS, 'Новость'),
-    ]
+
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     post_category = models.CharField(max_length=7, choices=POST_CATEGORY_CHOICES)
     date = models.DateTimeField(auto_now_add=True)

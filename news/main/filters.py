@@ -1,6 +1,7 @@
-from django_filters import FilterSet, DateFilter, CharFilter, ModelChoiceFilter
-from .models import Post, Category
+from django_filters import FilterSet, DateFilter, CharFilter, ModelChoiceFilter, ChoiceFilter
+from .models import Post, Category, POST_CATEGORY_CHOICES
 from django.forms.widgets import DateInput
+from django import forms
 
 
 # поисковый фильтр
@@ -12,19 +13,29 @@ class PostFilter(FilterSet):
     )
 
     category = ModelChoiceFilter(
+        empty_label='все категории',
         field_name='category',
         queryset=Category.objects.all(),
         label='Выбор категории',
         lookup_expr='exact',
+        # widget=forms.CheckboxSelectMultiple,        # не работает мультивыбор виджет
     )
 
+    # ARTICLE = 'AR'
+    # NEWS = 'NW'
+    # POST_CATEGORY_CHOICES = [
+    #     (ARTICLE, 'Статья'),
+    #     (NEWS, 'Новость'),
+    # ]
+
     # !!не получается настроить ModelChoiceFilter для post_category!!
-    # post_category = ModelChoiceFilter(
-    #     field_name='post_category',
-    #     queryset=????????,
-    #     label='Выбор раздела',
-    #     lookup_expr='exact',
-    # )
+    post_category = ChoiceFilter(
+        empty_label='все разделы',
+        # choices='POST_CATEGORY_CHOICES',
+        field_name='post_category',
+        label='Выбор раздела',
+        lookup_expr='exact',
+    )
 
     date = DateFilter(
         field_name='date',
