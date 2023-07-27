@@ -11,8 +11,8 @@
 {{ post.text|apply_censor }}
 <p>
 {% if user.is_authenticated %}
-<p><a href="edit/" title="Редактировать публикацию" target="_blank">Редактировать публикацию</a></p>
-<p><a href="delete/" title="Удалить публикацию" target="_blank">Удалить публикацию</a></p>
+<p><a href="edit/" title="Редактировать публикацию">Редактировать публикацию</a></p>
+<p><a href="delete/" title="Удалить публикацию">Удалить публикацию</a></p>
 {% endif %}
 
 {% endblock content %}
