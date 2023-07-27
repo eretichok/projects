@@ -9,4 +9,10 @@
 <h3>{{ post.headline|apply_censor }}</h3>
 Автор {{ post.author.user }}, дата {{ post.date|date:'d M Y' }} <hr>
 {{ post.text|apply_censor }}
+<p>
+{% if user.is_authenticated %}
+<p><a href="edit/" title="Редактировать публикацию" target="_blank">Редактировать публикацию</a></p>
+<p><a href="delete/" title="Удалить публикацию" target="_blank">Удалить публикацию</a></p>
+{% endif %}
+
 {% endblock content %}

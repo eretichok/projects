@@ -18,20 +18,11 @@ class PostFilter(FilterSet):
         queryset=Category.objects.all(),
         label='Выбор категории',
         lookup_expr='exact',
-        # widget=forms.CheckboxSelectMultiple,        # не работает мультивыбор виджет
     )
 
-    # ARTICLE = 'AR'
-    # NEWS = 'NW'
-    # POST_CATEGORY_CHOICES = [
-    #     (ARTICLE, 'Статья'),
-    #     (NEWS, 'Новость'),
-    # ]
-
-    # !!не получается настроить ModelChoiceFilter для post_category!!
     post_category = ChoiceFilter(
         empty_label='все разделы',
-        # choices='POST_CATEGORY_CHOICES',
+        choices=POST_CATEGORY_CHOICES,
         field_name='post_category',
         label='Выбор раздела',
         lookup_expr='exact',

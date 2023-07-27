@@ -23,7 +23,7 @@
 
         {% for post in posts %}
            <tr>
-               <td>{{ post.headline }}</td>
+               <td><a href="/{{ post.id }}/">{{ post.headline|apply_censor }}</a></td>
                <td>{{ post.text|truncatechars:15|apply_censor}}</td>
                <td>{{ post.post_category }}</td>
                <td>{{ post.author.name }}</td>

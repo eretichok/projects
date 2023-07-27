@@ -25,7 +25,7 @@
 
         {% for post in search %}
            <tr>
-               <td>{{ post.headline|apply_censor }}</td>
+               <td><a href="/{{ post.id }}/">{{ post.headline|apply_censor }}</a></td>
                <td>{{ post.text|truncatechars:15|apply_censor}}</td>
                <td>{{ post.post_category }}</td>
                <td>{{ post.author }}</td>
