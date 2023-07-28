@@ -8,7 +8,6 @@ class PostForm(forms.ModelForm):
     # простые проверки до обращения к базе без переопределения метода clean()
     headline = forms.CharField(min_length=3)
     text = forms.CharField(min_length=3)
-    # author = forms.ModelMultipleChoiceField(queryset=Author.objects.all())
 
     class Meta:
         model = Post

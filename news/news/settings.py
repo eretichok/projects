@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'main',
+    'main.apps.MainConfig',
     'django_filters',
     'sign',
 
@@ -153,3 +153,11 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 ACCOUNT_FORMS = {'signup': 'sign.forms.BasicSignupForm'}
+
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'eretichok@yandex.ru'
+EMAIL_HOST_PASSWORD = 'maxbubs11ya'
+EMAIL_USE_SSL = True
+
+DEFAULT_FROM_EMAIL = 'eretichok@yandex.ru'

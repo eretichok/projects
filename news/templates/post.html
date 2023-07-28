@@ -7,12 +7,25 @@
 
 {% block content %}
 <h3>{{ post.headline|apply_censor }}</h3>
-Автор {{ post.author.user }}, дата {{ post.date|date:'d M Y' }} <hr>
+Автор {{ post.author.user }}, дата {{ post.date|date:'d M Y' }}
+<hr>
 {{ post.text|apply_censor }}
+<hr>
+Категория публикации:
+{% for category in post.category.all %}
+    <button> <a href="/category_subscribe/"{{ category.category_name }} title="Подписаться">{{ category.category_name }}</a> </button>
+{% endfor %}
 <p>
-{% if user.is_authenticated %}
-<p><a href="edit/" title="Редактировать публикацию">Редактировать публикацию</a></p>
-<p><a href="delete/" title="Удалить публикацию">Удалить публикацию</a></p>
-{% endif %}
+
+
+<!-- надо завернуть кнопки в if user == post.author -->
+
+<form action="edit/">
+    <button type="Редактировать публикацию"> Редактировать публикацию</button>
+</form>
+<form action="delete/">
+    <button type="Удалить публикацию"> Удалить публикацию</button>
+</form>
+
 
 {% endblock content %}
