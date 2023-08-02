@@ -1,0 +1,34 @@
+{% extends 'default.html' %}
+{% load custom_filters %}
+
+{% block title %}
+
+{% endblock title %}
+
+{% block content %}
+    <h3>{{ post.headline|apply_censor }}</h3>
+    Автор {{ post.author.user }}, дата {{ post.date|date:'d M Y' }}
+
+    <hr>{{ post.text|apply_censor }}<hr>
+
+    <p>Раздел <<{{ post.post_category }}>></p>
+    <div style="white-space: nowrap;">
+  <div style="display: inline-block; margin-right: 10px;">Категория:</div>
+
+    {% for category in post.category.all %}
+         <form method="get" action="/category/{{category.id}}/" style="display: inline-block; margin-right: 10px;">
+            <button type="Просмотр публикаций категории {{category.category_name}}">{{category.category_name}}</button>
+        </form>
+    {% endfor %}
+</div>
+    <p>{% if user == post.author.user  %}
+    <form action="edit/">
+        <button type="Редактировать публикацию"> Редактировать публикацию</button>
+    </form>
+    <form action="delete/">
+        <button type="Удалить публикацию"> Удалить публикацию</button>
+    </form>
+    </p>
+    {% endif %}
+
+{% endblock content %}

@@ -1,0 +1,31 @@
+{% extends "default.html" %}
+
+{% block content %}
+<h2>Личный кабинет пользователя {{request.user.first_name}}</h2>
+{% for group in request.user.groups.all %}
+    {% if group.name == 'authors' %}
+        <div> Псевдоним: {{request.user.author.name}} </div>
+    {% endif %}
+{% endfor %}
+<div> Имя: {{request.user.first_name}} </div>
+<div> Фамилия: {{request.user.last_name}} </div>
+<div> Электронная почта: {{request.user.email}} </div>
+<div> Дата регистрации: {{request.user.date_joined}} </div>
+
+
+<div> Группа пользователя:
+            {% if not is_not_author %}
+                Автор
+            {% else %}
+                Зарегистрированный пользователь
+            {% endif %}
+    </div>
+
+<button> <a href="{% url 'profile_edit' user.id %}">Редактировать профиль</a> </button>
+
+{% if is_not_author %}
+<button> <a href="/sign/upgrade/"> Хочу стать автором!</a> </button>
+{% endif %}
+
+<button> <a href="/accounts/logout/">Выйти</a> </button>
+{% endblock %}

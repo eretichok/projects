@@ -1,0 +1,22 @@
+{% extends 'default.html' %}
+{% load custom_filters %}
+{% load custom_tags %}
+
+{% block content %}
+
+    <h2>Вы подписаны на следующие категории</h2>
+        {% if subscribe_categories %}
+            {% for category in subscribe_categories %}
+<div>
+                 <form method="get" action="/category/{{category.category.id}}/" style="display: inline-block; margin-right: 10px;">
+                    <button type="Просмотр публикаций категории {{category.category.category_name}}">{{category.category.category_name}}</button>
+                </form>
+                <a href="/category/{{category.category.id}}/unsubscribe/">отписаться</a>
+                </form>
+</div>
+            {% endfor %}
+        {% else %}
+            <h2>У вас нет подписок на категории!</h2>
+        {% endif %}
+
+{% endblock content %}
