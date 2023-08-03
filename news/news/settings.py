@@ -153,7 +153,7 @@ ACCOUNT_FORMS = {'signup': 'sign.forms.BasicSignupForm'}
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'eretichok@yandex.ru'
-EMAIL_HOST_PASSWORD = 'mail_password'  # пароль от почты
+EMAIL_HOST_PASSWORD = 'пароль'  # пароль от почты
 EMAIL_USE_SSL = True
 
 DEFAULT_FROM_EMAIL = 'eretichok@yandex.ru'
@@ -164,3 +164,9 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # вся ис�
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 # если задача не выполняется за 25 секунд, то она автоматически снимается
 APSCHEDULER_RUN_NOW_TIMEOUT = 30  # Seconds
+
+CELERY_BROKER_URL = 'redis://default:QrXFn4SmLqouKjb7b2KjTgM1bt5Eb3iw@redis-10363.c304.europe-west1-2.gce.cloud.redislabs.com:10363'
+CELERY_RESULT_BACKEND = 'redis://default:QrXFn4SmLqouKjb7b2KjTgM1bt5Eb3iw@redis-10363.c304.europe-west1-2.gce.cloud.redislabs.com:10363'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'

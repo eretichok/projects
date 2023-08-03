@@ -40,9 +40,11 @@ def posts_by_category(request, category_id):
         subscribed_categories = SubscribeCategory.objects.filter(user=request.user, category=category)
     else:
         subscribed_categories = None
+
     paginator = Paginator(posts, 5)  # не работает: на странице все равно более 5 постов выводится
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
     return render(request, 'posts_by_category.html',
               {'category': category,
                'posts': posts,

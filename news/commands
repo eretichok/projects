@@ -27,3 +27,46 @@ python manage.py migrate
 Ссылки:
 http://localhost:8000/
 http://localhost:8000/admin/
+
+Celery+Reddis:
+1) установка Cellary:
+pip3 install celery
+в celery.py (содаем рядом с settings.py):
+<
+import os
+from celery import Celery
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'news.settings')
+app = Celery('news')
+app.config_from_object('django.conf:settings', namespace = 'CELERY')
+app.autodiscover_tasks()
+>
+
+рядом с settings.py в __init__.py:
+<
+from .celery import app as celery_app
+
+__all__ = ('celery_app',)
+>
+
+2) установка reddis на windows:
+регаемся на реддисе с vpn, создаем Redis Cloud
+
+в settings.py:
+<
+CELERY_BROKER_URL = 'redis://localhost:6379'  # или redis://логин:пароль@endpoint:port если для Cloud
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'  # или redis://логин:пароль@endpoint:port если для Cloud
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+>
+
+3) запуск из под виндоус из каталога /news/news/
+в первом терминале запускаем django, во втором Celery:
+- для теста
+celery -A news worker -l INFO --pool=solo
+- для запуска переодических задач:
+celery -A news worker -l INFO -B
+- для запуска переодических задач на windows в двух разных терминалах указать:
+celery -A news worker -l INFO
+celery -A news beat -l INFO

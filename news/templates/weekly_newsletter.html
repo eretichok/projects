@@ -13,7 +13,10 @@
     {% endfor %}
     </h5>
     {% for post in posts %}
-        <p> <a href="/{{ post.id }}/">Заголовок: {{ post.headline }}. Превью:{{ post.text|truncatechars:15 }}</a></p>
+        <p> <a href="/{{ post.id }}/">
+            {{ post.post_category }} в категории {{ post.category.category_name }}.
+            Заголовок: {{ post.headline }}. Превью:{{ post.text|truncatechars:15 }}</a>
+        </p>
     {% endfor %}
 </body>
 </html>
