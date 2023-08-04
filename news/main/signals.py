@@ -5,6 +5,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.contrib.auth.models import User
 from django.conf import settings
+from tasks import new_post_mail
 
 
 # рассылка подписчикам: новая публикация в категории, на которую пользователи подписаны
@@ -31,11 +32,4 @@ def notify_subscribers(sender, instance, action, pk_set, **kwargs):
 @receiver(post_save, sender=User)
 def notify_new_user(sender, instance, created, **kwargs):
     if created:
-        message = render_to_string('new_user_mail.html', {'user': instance})
-        subject = f'Добро пожаловать, {instance.first_name} {instance.last_name}!'
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[instance.email]
-            )
+        new_post_mail.delay(post=instance)

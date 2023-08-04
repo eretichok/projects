@@ -31,21 +31,18 @@ def weekly_send_mail():
 
 # задача: рассылка подписчикам на категорию нового поста (проверка раз в 1 минуту)
 @shared_task
-def new_post_mail():
-    new_posts = Post.objects.all().filter(date__gt=datetime.now() - timedelta(minutes=1))
-    if new_posts:
-        for post in new_posts:
-            post_categories = post.category.all()
-            email_list = SubscribeCategory.objects.filter(category__in=post_categories).values_list('user__email',
-                                                                                                    flat=True).distinct()
-            post_categories_name = ', '.join(post_categories.values_list('category_name', flat=True))
-            if email_list:
-                for email in email_list:
-                    subject = f"Вышла новая публикация в категории {post_categories_name}."
-                    message = render_to_string('post_created.html', {'post': post})
-                    send_mail(
-                        subject=subject,
-                        message=message,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[email]
-                    )
+def new_post_mail(post):
+    post_categories = post.category.all()
+    email_list = SubscribeCategory.objects.filter(category__in=post_categories).values_list('user__email',
+                                                                                            flat=True).distinct()
+    post_categories_name = ', '.join(post_categories.values_list('category_name', flat=True))
+    if email_list:
+        for email in email_list:
+            subject = f"Вышла новая публикация в категории {post_categories_name}."
+            message = render_to_string('post_created.html', {'post': post})
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email]
+            )

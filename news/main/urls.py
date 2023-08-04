@@ -2,11 +2,12 @@ from django.urls import path
 from .views import PostsList, PostDetail, Search
 from .views import NewsCreate, ArticleCreate, PostsEdit, PostsDelete
 from .views import subscriptions, subscribe_category, unsubscribe_category, posts_by_category
+from django.views.decorators.cache import cache_page
 
 urlpatterns = [
     # для любых пользователей
-    path('', PostsList.as_view(), name='posts'),
-    path('<int:pk>/', PostDetail.as_view(), name='post_detail'),
+    path('', cache_page(60)(PostsList.as_view()), name='posts'),
+    path('<int:pk>/', cache_page(60*5)(PostDetail.as_view()), name='post_detail'),
     path('search/', Search.as_view(), name='search'),
     path('category/', PostsList.as_view(), name='category'),
     path('category/<int:category_id>/', posts_by_category, name='posts_by_category'),
